@@ -32,5 +32,15 @@ func (p *Postgres) Createuser(id uuid.UUID, created_at time.Time, updated_at tim
 
 
 func (p *Postgres) GetUser(api_key string) (types.User, error) {
-	return types.User{}, nil 
+	stmt := "SELECT * from users WHERE api_key = ?"
+	
+	var user types.User; 
+
+	err := p.DB.QueryRow(stmt, api_key).Scan(&user.ID, &user.Created_at, &user.Updated_at, &user.Api_key) 
+
+	if err != nil{
+		return types.User{}, err 
+	}
+
+	return user, nil 
 }
