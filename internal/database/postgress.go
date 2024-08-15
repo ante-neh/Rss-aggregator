@@ -3,7 +3,9 @@ package database
 import (
 	"database/sql"
 	"time"
+
 	"github.com/ante-neh/Rss-aggregator/types"
+	"github.com/ante-neh/Rss-aggregator/util"
 	"github.com/google/uuid"
 )
 
@@ -16,10 +18,10 @@ type Postgres struct {
 
 
 func (p *Postgres) Createuser(id uuid.UUID, created_at time.Time, updated_at time.Time, name string) (types.User, error){
-	stmt := "INSERT INTO users(id, created_at, updated_at, name) VALUES($1, $2, $3, $4) RETURNING id, created_at, updated_at, name"
+	stmt := "INSERT INTO users(id, created_at, updated_at, name, api_key) VALUES($1, $2, $3, $4, $5) RETURNING id, created_at, updated_at, name, api_key"
 
 	var user types.User 
-	err := p.DB.QueryRow(stmt, id, created_at, updated_at, name).Scan(&user.ID, &user.Created_at, &user.Updated_at, &user.Name )
+	err := p.DB.QueryRow(stmt, id, created_at, updated_at, name, util.GenerateApikey()).Scan(&user.ID, &user.Created_at, &user.Updated_at, &user.Name, &user.Api_key )
 
 	if err != nil{
 		return types.User{}, err

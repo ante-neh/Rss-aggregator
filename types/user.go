@@ -11,4 +11,5 @@ type User struct {
 	Created_at time.Time `json:"created_at"`
 	Updated_at time.Time `json:"updated_at"`
 	Name       string    `json:"name"`
+	Api_key    string    `json:"api_key"`
 }

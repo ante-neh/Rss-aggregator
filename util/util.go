@@ -1,6 +1,9 @@
 package util
 
 import (
+	"crypto/rand"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -33,4 +36,14 @@ func ResponseWithError(w http.ResponseWriter, code int, message string ){
 		Error:message,
 	})
 	
+}
+
+
+func GenerateApikey() string{
+	random := make([]byte, 16)
+	rand.Read(random)
+
+	hash := sha256.Sum256(random)
+
+	return hex.EncodeToString(hash[:])
 }
