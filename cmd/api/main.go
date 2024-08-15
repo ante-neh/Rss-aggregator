@@ -51,6 +51,8 @@ func main() {
 	}
 }
 
+
+
 func openDb(dns string) (*sql.DB, error) {
 	db, err := sql.Open("postgres", dns)
 	if err != nil {
