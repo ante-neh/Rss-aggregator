@@ -3,7 +3,6 @@ package database
 import (
 	"database/sql"
 	"time"
-
 	"github.com/ante-neh/Rss-aggregator/types"
 	"github.com/ante-neh/Rss-aggregator/util"
 	"github.com/google/uuid"
@@ -11,6 +10,7 @@ import (
 
 type DatabaseOperation interface{
 	Createuser(id uuid.UUID, created_at time.Time, updated_at time.Time, name string) (types.User, error)
+	GetUser(api_key string) (types.User, error) 
 }
 type Postgres struct {
 	DB *sql.DB
@@ -28,4 +28,9 @@ func (p *Postgres) Createuser(id uuid.UUID, created_at time.Time, updated_at tim
 	}
 
 	return user, nil 
+}
+
+
+func (p *Postgres) GetUser(api_key string) (types.User, error) {
+	return types.User{}, nil 
 }
