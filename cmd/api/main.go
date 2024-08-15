@@ -1,13 +1,13 @@
 package main
 
 import (
-	"database/sql"
-	"flag"
-	"github.com/ante-neh/Rss-aggregator/internal/server"
-	"github.com/joho/godotenv"
 	"log"
 	"os"
-	_"github.com/lib/pq"
+	"flag"
+	"database/sql"
+	_ "github.com/lib/pq"
+	"github.com/ante-neh/Rss-aggregator/internal/server"
+	"github.com/joho/godotenv"
 )
 
 func main() {
@@ -51,8 +51,6 @@ func main() {
 		app.ErrorLogger.Println("Unable to Start the Server", err)
 	}
 }
-
-
 
 func openDb(dns string) (*sql.DB, error) {
 	db, err := sql.Open("postgres", dns)
