@@ -7,6 +7,7 @@ import (
 	"github.com/joho/godotenv"
 	"log"
 	"os"
+	_"github.com/lib/pq"
 )
 
 func main() {
@@ -32,7 +33,7 @@ func main() {
 	db, err := openDb(*dns)
 
 	if err != nil {
-		infoLogger.Fatal("Unable to Connect to the database", err)
+		errorLogger.Fatal("Unable to Connect to the database", err)
 	}
 
 	defer db.Close()
@@ -50,6 +51,8 @@ func main() {
 		app.ErrorLogger.Println("Unable to Start the Server", err)
 	}
 }
+
+
 
 func openDb(dns string) (*sql.DB, error) {
 	db, err := sql.Open("postgres", dns)
