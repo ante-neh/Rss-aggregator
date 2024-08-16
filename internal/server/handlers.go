@@ -72,3 +72,23 @@ func (s *Server) handleGetFeeds(w http.ResponseWriter, r *http.Request) {
 
 	util.ResponseWithJson(w, 200, feeds)
 }
+
+
+
+func (s *Server) handleFeedFollows(w http.ResponseWriter, r *http.Request, user types.User){
+	type parameters struct{
+		FeedId uuid.UUID `json:"feed_id"`
+	}
+
+	params := parameters{} 
+	json.NewDecoder(r.Body).Decode(&params) 
+	feed_follow, err := s.DB.CreateFeedFollows(uuid.New(), time.Now().UTC(), time.Now().UTC(), params.FeedId, user.ID)
+
+	if err != nil{
+		s.ErrorLogger.Println(err)
+		util.ResponseWithError(w, 404, "false")
+		return 
+	}
+
+	util.ResponseWithJson(w, 201, feed_follow)
+}

@@ -13,6 +13,7 @@ type DatabaseOperation interface {
 	GetUser(api_key string) (types.User, error)
 	CreateFeeds(id uuid.UUID, user_id uuid.UUID, created_at, update_at time.Time, name, url string) (types.Feeds, error)
 	GetFeeds() ([]types.Feeds, error)
+	CreateFeedFollows(id uuid.UUID, created_at, updated_at time.Time, feed_id, user_id uuid.UUID)(types.FeedFollow, error)
 }
 type Postgres struct {
 	DB *sql.DB
@@ -86,4 +87,9 @@ func (p *Postgres) GetFeeds() ([]*types.Feeds, error) {
 	}
 
 	return feeds, nil
+}
+
+
+func (p *Postgres) CreateFeedFollows(id uuid.UUID, created_at, updated_at time.Time, feed_id, user_id uuid.UUID) (types.FeedFollow, error){
+	return types.FeedFollow{}, nil 
 }
