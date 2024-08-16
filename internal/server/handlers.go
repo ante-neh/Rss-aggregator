@@ -119,3 +119,15 @@ func(s *Server) handleGetFeedFollows(w http.ResponseWriter, r *http.Request, use
 
 	util.ResponseWithJson(w, 200, feedFollows)
 }
+
+
+func (s *Server) handleDeleteFeedFollow(w http.ResponseWriter, r *http.Request, user types.User){
+	err := s.DB.DeleteFeedFollow(user.ID) 
+	if err != nil{
+		s.ErrorLogger.Println(err)
+		util.ResponseWithError(w, 400, "Couldn't delete feed follow")
+		return 
+	}
+
+	util.ResponseWithJson(w, 200, map[string]string{"message":"feed follow deleted"})
+}

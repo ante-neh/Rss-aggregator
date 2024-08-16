@@ -9,7 +9,8 @@ import (
 )
 
 type DatabaseOperation interface {
-	GetFeeds() ([]types.Feeds, error)
+	GetFeeds()([]types.Feeds, error)
+	DeleteFeedFollow(id uuid.UUID)(error)
 	GetUser(api_key string) (types.User, error)
 	GetFeedFollows(id uuid.UUID)([]types.FeedFollow, error)
 	Createuser(id uuid.UUID, created_at time.Time, updated_at time.Time, name string) (types.User, error)
@@ -134,4 +135,16 @@ func(p *Postgres) GetFeedFollows(id uuid.UUID)([]*types.FeedFollow, error){
 	}
 
 	return feedFollows, nil
+}
+
+
+func(p *Postgres) DeleteFeedFollow(id uuid.UUID)(error){
+	stmt := "DELETE feed_follows WHERE user_id = $1"
+	_, err := p.DB.Exec(stmt, id)
+	
+	if err != nil{
+		return err
+	}
+
+	return nil 
 }
