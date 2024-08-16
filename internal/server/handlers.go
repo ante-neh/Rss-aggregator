@@ -38,26 +38,37 @@ func (s *Server) handleGetUser(w http.ResponseWriter, r *http.Request, user type
 }
 
 
-func (s *Server) handleCreateFeeds(w http.ResponseWriter, r *http.Request, user types.User){
-	type parameters struct{
+func (s *Server) handleCreateFeeds(w http.ResponseWriter, r *http.Request, user types.User) {
+	type parameters struct {
 		Name string
-		Url string 
+		Url  string
 	}
 
-	params := parameters{} 
+	params := parameters{}
 	err := json.NewDecoder(r.Body).Decode(&params)
 
-	if err != nil{
+	if err != nil {
 		util.ResponseWithError(w, 400, "Bad Request")
-		return 
+		return
 	}
-	
+
 	feed, err := s.DB.CreateFeeds(uuid.New(), user.ID, params.Name, params.Url, time.Now().UTC(), time.Now().UTC())
 
-	if err != nil{
+	if err != nil {
 		util.ResponseWithError(w, 404, "Unable to create feed")
-		return 
+		return
 	}
 
 	util.ResponseWithJson(w, 201, feed)
+}
+
+func (s *Server) handleGetFeeds(w http.ResponseWriter, r *http.Request) {
+	feeds, err := s.DB.GetFeeds()
+	if err != nil {
+		s.ErrorLogger.Println(err)
+		util.ResponseWithError(w, 400, "Bad request")
+		return
+	}
+
+	util.ResponseWithJson(w, 200, feeds)
 }

@@ -8,6 +8,8 @@ func (s *Server) Router() http.Handler {
 	mux.Handle("POST /api/v1/users", http.HandlerFunc(s.handleUserCreate))
 	mux.Handle("GET /api/v1/users/", s.authMiddleware((s.handleGetUser)))
 	mux.Handle("POST /api/v1/feeds", s.authMiddleware(s.handleCreateFeeds))
+	mux.Handle("GET /api/v1/feeds", http.HandlerFunc(s.handleGetFeeds))
+
 	
 	return s.secureHeaders(mux)
 }
