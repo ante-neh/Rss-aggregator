@@ -1,8 +1,8 @@
 package types
 
 import (
-	"time"
 	"github.com/google/uuid"
+	"time"
 )
 
 type Feeds struct {
@@ -14,11 +14,10 @@ type Feeds struct {
 	Url        string    `json:"url"`
 }
 
-
-type FeedFollow struct{
-	ID uuid.UUID `json:"id"`
+type FeedFollow struct {
+	ID         uuid.UUID `json:"id"`
 	Created_at time.Time `json:"creaeted_at"`
 	Updated_at time.Time `json:"updated_at"`
-	FeedId uuid.UUID `json:"feed_id"`
-	UserId uuid.UUID `json:"user_id"`
+	FeedId     uuid.UUID `json:"feed_id"`
+	UserId     uuid.UUID `json:"user_id"`
 }

@@ -9,10 +9,10 @@ import (
 )
 
 type DatabaseOperation interface {
-	Createuser(id uuid.UUID, created_at time.Time, updated_at time.Time, name string) (types.User, error)
-	GetUser(api_key string) (types.User, error)
-	CreateFeeds(id uuid.UUID, user_id uuid.UUID, created_at, update_at time.Time, name, url string) (types.Feeds, error)
 	GetFeeds() ([]types.Feeds, error)
+	GetUser(api_key string) (types.User, error)
+	Createuser(id uuid.UUID, created_at time.Time, updated_at time.Time, name string) (types.User, error)
+	CreateFeeds(id uuid.UUID, user_id uuid.UUID, created_at, update_at time.Time, name, url string) (types.Feeds, error)
 	CreateFeedFollows(id uuid.UUID, created_at, updated_at time.Time, feed_id, user_id uuid.UUID)(types.FeedFollow, error)
 }
 type Postgres struct {
@@ -91,5 +91,15 @@ func (p *Postgres) GetFeeds() ([]*types.Feeds, error) {
 
 
 func (p *Postgres) CreateFeedFollows(id uuid.UUID, created_at, updated_at time.Time, feed_id, user_id uuid.UUID) (types.FeedFollow, error){
-	return types.FeedFollow{}, nil 
+	stmt := "INSERT INTO feed_follows(id, created_at, updated_at, feed_id, user_id) VALUES($1, $2, $3, $4, $5) RETURNING *"
+
+	var feedFollow types.FeedFollow 
+	err := p.DB.QueryRow(stmt, id, created_at, updated_at, feed_id, user_id).Scan(&feedFollow.ID, &feedFollow.Created_at, &feedFollow.Updated_at, &feedFollow.FeedId, &feedFollow.UserId)
+
+	if err != nil{
+		return types.FeedFollow{}, err
+
+	}
+
+	return feedFollow, nil 
 }
