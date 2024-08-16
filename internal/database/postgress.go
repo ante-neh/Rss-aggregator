@@ -11,6 +11,7 @@ import (
 type DatabaseOperation interface {
 	Createuser(id uuid.UUID, created_at time.Time, updated_at time.Time, name string) (types.User, error)
 	GetUser(api_key string) (types.User, error)
+	CreateFeeds(id uuid.UUID, user_id uuid.UUID, created_at, update_at time.Time, name, url string) (types.Feeds, error)
 }
 type Postgres struct {
 	DB *sql.DB
@@ -41,4 +42,17 @@ func (p *Postgres) GetUser(api_key string) (types.User, error) {
 	}
 
 	return user, nil
+}
+
+func (p *Postgres) CreateFeeds(id, user_id uuid.UUID, name, url string, created_at, updated_at time.Time)(types.Feeds, error){
+	stmt := "INSERT INTO feeds(id, created_at, updated_at, name, url, user_id) VALUES($1, $2, $3, $4, $5, $6) RETURNING *"
+	var feed types.Feeds;
+	err := p.DB.QueryRow(stmt, id, created_at, updated_at, name, url, user_id).Scan(&feed.ID, &feed.Created_at, &feed.Updated_at, &feed.Name, &feed.Url, &feed.UserId)
+
+	if err != nil{
+		return types.Feeds{}, nil
+	}
+
+
+	return feed, nil
 }

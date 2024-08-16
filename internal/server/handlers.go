@@ -36,3 +36,8 @@ func (s *Server) handleUserCreate(w http.ResponseWriter, r *http.Request) {
 func (s *Server) handleGetUser(w http.ResponseWriter, r *http.Request, user types.User) {
 	util.ResponseWithJson(w, 200, user)
 }
+
+
+func (s *Server) handleCreateFeeds(w http.ResponseWriter, r *http.Request, user types.User){
+	
+}
