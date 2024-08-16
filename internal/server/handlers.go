@@ -19,13 +19,19 @@ func (s *Server) handleUserCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	params := parameters{}
-	json.NewDecoder(r.Body).Decode(&params)
+	err := json.NewDecoder(r.Body).Decode(&params)
+
+	if err != nil{
+		s.ErrorLogger.Println(err)
+		util.ResponseWithError(w, 400, "Error parsing the json")
+		return 
+	}
 
 	userId, err := s.DB.Createuser(uuid.New(), time.Now().UTC(), time.Now().UTC(), params.Name)
 
 	if err != nil {
 		s.ErrorLogger.Println(err)
-		util.ResponseWithError(w, 500, "Faild to create user")
+		util.ResponseWithError(w, 500, "Couldn't create user")
 		return
 	}
 
@@ -38,26 +44,90 @@ func (s *Server) handleGetUser(w http.ResponseWriter, r *http.Request, user type
 }
 
 
-func (s *Server) handleCreateFeeds(w http.ResponseWriter, r *http.Request, user types.User){
-	type parameters struct{
+func (s *Server) handleCreateFeeds(w http.ResponseWriter, r *http.Request, user types.User) {
+	type parameters struct {
 		Name string
-		Url string 
+		Url  string
 	}
 
-	params := parameters{} 
+	params := parameters{}
 	err := json.NewDecoder(r.Body).Decode(&params)
 
-	if err != nil{
-		util.ResponseWithError(w, 400, "Bad Request")
-		return 
+	if err != nil {
+		util.ResponseWithError(w, 400, "Cound't parse the json")
+		return
 	}
-	
+
 	feed, err := s.DB.CreateFeeds(uuid.New(), user.ID, params.Name, params.Url, time.Now().UTC(), time.Now().UTC())
 
-	if err != nil{
-		util.ResponseWithError(w, 404, "Unable to create feed")
-		return 
+	if err != nil {
+		util.ResponseWithError(w, 404, "Couldn't create feed")
+		return
 	}
 
 	util.ResponseWithJson(w, 201, feed)
+}
+
+func (s *Server) handleGetFeeds(w http.ResponseWriter, r *http.Request) {
+	feeds, err := s.DB.GetFeeds()
+	if err != nil {
+		s.ErrorLogger.Println(err)
+		util.ResponseWithError(w, 400, "Bad request")
+		return
+	}
+
+	util.ResponseWithJson(w, 200, feeds)
+}
+
+
+
+func (s *Server) handleFeedFollows(w http.ResponseWriter, r *http.Request, user types.User){
+	type parameters struct{
+		FeedId uuid.UUID `json:"feed_id"`
+	}
+
+	params := parameters{} 
+	err := json.NewDecoder(r.Body).Decode(&params) 
+
+	s.InfoLogger.Println(&params.FeedId)
+	if err != nil{
+		s.ErrorLogger.Println(err)
+		util.ResponseWithError(w, 400, "Error parasing the json")
+		return 
+	}
+
+
+	feed_follow, err := s.DB.CreateFeedFollows(uuid.New(), time.Now().UTC(), time.Now().UTC(), params.FeedId, user.ID)
+
+	if err != nil{
+		s.ErrorLogger.Println(err)
+		util.ResponseWithError(w, 404, "Couldn't create feed follow")
+		return 
+	}
+
+	util.ResponseWithJson(w, 201, feed_follow)
+}
+
+
+func(s *Server) handleGetFeedFollows(w http.ResponseWriter, r *http.Request, user types.User){
+	feedFollows, err := s.DB.GetFeedFollows(user.ID)
+	if err != nil{
+		s.ErrorLogger.Println(err)
+		util.ResponseWithError(w, 400, "Coulnd't get feed follow")
+		return 
+	}
+
+	util.ResponseWithJson(w, 200, feedFollows)
+}
+
+
+func (s *Server) handleDeleteFeedFollow(w http.ResponseWriter, r *http.Request, user types.User){
+	err := s.DB.DeleteFeedFollow(user.ID) 
+	if err != nil{
+		s.ErrorLogger.Println(err)
+		util.ResponseWithError(w, 400, "Couldn't delete feed follow")
+		return 
+	}
+
+	util.ResponseWithJson(w, 200, map[string]string{"message":"feed follow deleted"})
 }

@@ -44,7 +44,7 @@ func (s *Server) authMiddleware(next authHandler) http.HandlerFunc {
 func (s *Server) secureHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("X-XSS-Protection", "1; mode=block") //prevent XSS
-		w.Header().Set("X-Frame-Options", "deny")           //Clickjacking attacks
+        w.Header().Set("X-Frame-Options", "deny") //Clickjacking attacks
 		next.ServeHTTP(w, r)
 	})
 }
