@@ -10,6 +10,7 @@ func (s *Server) Router() http.Handler {
 	mux.Handle("POST /api/v1/feeds", s.authMiddleware(s.handleCreateFeeds))
 	mux.Handle("GET /api/v1/feeds", http.HandlerFunc(s.handleGetFeeds))
 	mux.Handle("POST /api/v1/feed_follows",s.authMiddleware(s.handleFeedFollows))
+	mux.Handle("GET /api/v1/feed_follows", s.authMiddleware(s.handleGetFeedFollows))
 	
 	return s.secureHeaders(mux)
 }

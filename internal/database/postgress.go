@@ -11,6 +11,7 @@ import (
 type DatabaseOperation interface {
 	GetFeeds() ([]types.Feeds, error)
 	GetUser(api_key string) (types.User, error)
+	GetFeedFollows(id uuid.UUID)([]types.FeedFollow, error)
 	Createuser(id uuid.UUID, created_at time.Time, updated_at time.Time, name string) (types.User, error)
 	CreateFeeds(id uuid.UUID, user_id uuid.UUID, created_at, update_at time.Time, name, url string) (types.Feeds, error)
 	CreateFeedFollows(id uuid.UUID, created_at, updated_at time.Time, feed_id, user_id uuid.UUID)(types.FeedFollow, error)
@@ -102,4 +103,35 @@ func (p *Postgres) CreateFeedFollows(id uuid.UUID, created_at, updated_at time.T
 	}
 
 	return feedFollow, nil 
+}
+
+
+func(p *Postgres) GetFeedFollows(id uuid.UUID)([]*types.FeedFollow, error){
+	stmt :="SELECT * FROM feed_follows WHERE user_id = $1"
+
+	rows, err := p.DB.Query(stmt, id) 
+	if err != nil{
+		return nil ,err
+	}
+
+	defer rows.Close() 
+
+	var feedFollows []*types.FeedFollow  
+
+	for rows.Next(){
+		feedFollow := &types.FeedFollow{}
+		err := rows.Scan(&feedFollow.ID, &feedFollow.Created_at, &feedFollow.Updated_at, &feedFollow.FeedId, &feedFollow.UserId)
+		
+		if err != nil{
+			return nil, err
+		}
+
+		feedFollows = append(feedFollows, feedFollow)
+	}
+
+	if err := rows.Err(); err != nil{
+		return nil, err
+	}
+
+	return feedFollows, nil
 }

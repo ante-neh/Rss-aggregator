@@ -89,6 +89,7 @@ func (s *Server) handleFeedFollows(w http.ResponseWriter, r *http.Request, user 
 	params := parameters{} 
 	err := json.NewDecoder(r.Body).Decode(&params) 
 
+	s.InfoLogger.Println(&params.FeedId)
 	if err != nil{
 		s.ErrorLogger.Println(err)
 		util.ResponseWithError(w, 400, "Error parasing the json")
@@ -105,4 +106,16 @@ func (s *Server) handleFeedFollows(w http.ResponseWriter, r *http.Request, user 
 	}
 
 	util.ResponseWithJson(w, 201, feed_follow)
+}
+
+
+func(s *Server) handleGetFeedFollows(w http.ResponseWriter, r *http.Request, user types.User){
+	feedFollows, err := s.DB.GetFeedFollows(user.ID)
+	if err != nil{
+		s.ErrorLogger.Println(err)
+		util.ResponseWithError(w, 400, "Coulnd't get feed follow")
+		return 
+	}
+
+	util.ResponseWithJson(w, 200, feedFollows)
 }
