@@ -89,7 +89,6 @@ func (s *Server) handleFeedFollows(w http.ResponseWriter, r *http.Request, user 
 	params := parameters{} 
 	err := json.NewDecoder(r.Body).Decode(&params) 
 
-	s.InfoLogger.Println(&params.FeedId)
 	if err != nil{
 		s.ErrorLogger.Println(err)
 		util.ResponseWithError(w, 400, "Error parasing the json")
@@ -122,7 +121,17 @@ func(s *Server) handleGetFeedFollows(w http.ResponseWriter, r *http.Request, use
 
 
 func (s *Server) handleDeleteFeedFollow(w http.ResponseWriter, r *http.Request, user types.User){
-	err := s.DB.DeleteFeedFollow(user.ID) 
+	id := r.URL.Query().Get("id")
+	parsedId, err := uuid.Parse(id)
+
+	if err != nil{
+		s.ErrorLogger.Println(err)
+		util.ResponseWithError(w, 400, "Bad request")
+		return 
+	}
+
+	err = s.DB.DeleteFeedFollow(parsedId, user.ID) 
+
 	if err != nil{
 		s.ErrorLogger.Println(err)
 		util.ResponseWithError(w, 400, "Couldn't delete feed follow")

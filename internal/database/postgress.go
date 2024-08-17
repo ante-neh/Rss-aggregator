@@ -138,9 +138,9 @@ func(p *Postgres) GetFeedFollows(id uuid.UUID)([]*types.FeedFollow, error){
 }
 
 
-func(p *Postgres) DeleteFeedFollow(id uuid.UUID)(error){
-	stmt := "DELETE FROM feed_follows WHERE user_id = $1"
-	_, err := p.DB.Exec(stmt, id)
+func(p *Postgres) DeleteFeedFollow(id , user_id uuid.UUID)(error){
+	stmt := "DELETE FROM feed_follows WHERE id=$1 AND user_id = $2"
+	_, err := p.DB.Exec(stmt, id, user_id)
 	
 	if err != nil{
 		return err
