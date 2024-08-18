@@ -12,6 +12,7 @@ type DatabaseOperation interface {
 	GetFeeds()([]types.Feeds, error)
 	DeleteFeedFollow(id uuid.UUID)(error)
 	GetUser(api_key string) (types.User, error)
+	GetNextFeedsToFetch(limit int)([]types.Feeds, error)
 	GetFeedFollows(id uuid.UUID)([]types.FeedFollow, error)
 	Createuser(id uuid.UUID, created_at time.Time, updated_at time.Time, name string) (types.User, error)
 	CreateFeeds(id uuid.UUID, user_id uuid.UUID, created_at, update_at time.Time, name, url string) (types.Feeds, error)
@@ -147,4 +148,35 @@ func(p *Postgres) DeleteFeedFollow(id uuid.UUID)(error){
 	}
 
 	return nil 
+}
+
+func (p *Postgres) GetNextFeedToFetch(limit int)([]*types.Feeds, error){
+	stmt := "SELECT * FROM feeds ORDER BY last_fetched_at ASC NOT NULLS FIRST LIMIT $1"
+
+	rows, err := p.DB.Query(stmt, limit)
+	if err != nil{
+		return []*types.Feeds{}, err
+	}
+	defer rows.Close()
+
+	feeds := []*types.Feeds{}
+
+	for rows.Next(){
+		feed := &types.Feeds{}
+		err := rows.Scan(&feed.ID, &feed.Created_at, &feed.Updated_at, &feed.Name, &feed.Url, &feed.Last_Fetched_At)
+
+		if err != nil{
+			return []*types.Feeds{}, err
+		}
+
+		feeds = append(feeds, feed)
+	}
+
+	if err := rows.Err(); err != nil{
+
+		return []*types.Feeds{}, err
+	}
+
+
+	return feeds, nil
 }

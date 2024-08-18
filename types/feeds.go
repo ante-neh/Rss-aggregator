@@ -12,6 +12,7 @@ type Feeds struct {
 	Created_at time.Time `json:"created_at"`
 	Updated_at time.Time `json:"updated_at"`
 	Url        string    `json:"url"`
+	Last_Fetched_At string `json:"last_fetched_at"`
 }
 
 type FeedFollow struct {
