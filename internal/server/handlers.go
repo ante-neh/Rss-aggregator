@@ -137,6 +137,7 @@ func(s *Server) handleGetPost(w http.ResponseWriter, r *http.Request, user types
 
 	if err != nil{
 		util.ResponseWithError(w, 400, "Couldn't get posts")
+		return 
 	}
 
 	util.ResponseWithJson(w, 200, result)
