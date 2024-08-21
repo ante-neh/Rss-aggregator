@@ -131,3 +131,13 @@ func (s *Server) handleDeleteFeedFollow(w http.ResponseWriter, r *http.Request, 
 
 	util.ResponseWithJson(w, 200, map[string]string{"message":"feed follow deleted"})
 }
+
+func(s *Server) handleGetPost(w http.ResponseWriter, r *http.Request, user types.User){
+	result, err := s.DB.GetFeedsForUser(user.ID, 10)
+
+	if err != nil{
+		util.ResponseWithError(w, 400, "Couldn't get posts")
+	}
+
+	util.ResponseWithJson(w, 200, result)
+}

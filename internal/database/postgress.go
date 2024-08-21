@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"time"
+
 	"github.com/ante-neh/Rss-aggregator/types"
 	"github.com/ante-neh/Rss-aggregator/util"
 	"github.com/google/uuid"
@@ -215,4 +216,37 @@ func (p *Postgres) CreatePost(id, feeds_id uuid.UUID, created_at, updated_at, pu
 	}
 
 	return nil 
+}
+
+
+func (p *Postgres) GetFeedsForUser(id uuid.UUID, limit int)([]*types.Post, error){
+	stmt := "SELECT posts.* FROM posts JOIN posts.feeds_id == feed_follows.feed_id WHERE feed_follows.user_id = $1 ORDER BY posts.published_at DESC LIMIT = $2"
+
+	rows, err := p.DB.Query(stmt, id, limit)
+
+	if err != nil{
+		return nil, err 
+	}
+
+	defer rows.Close() 
+	posts := []*types.Post{}
+
+	for rows.Next(){
+		post := &types.Post{}
+		err := rows.Scan(&post.ID, &post.CreatedAt, &post.UpdatedAt, &post.Title, &post.Url,  &post.PublishedAt,  &post.Description, &post.FeedId)
+
+		if err != nil{
+			return []*types.Post{}, err
+		}
+
+		posts = append(posts, post)
+	}
+
+	if err := rows.Err(); err != nil{
+
+		return []*types.Post{}, err
+	}
+
+
+	return posts, nil
 }

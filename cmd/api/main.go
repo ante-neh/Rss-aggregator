@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"time"
-
 	"github.com/ante-neh/Rss-aggregator/internal/server"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -45,7 +44,7 @@ func main() {
 
 	go app.StartScrapping(10, time.Minute)
 
-	
+
 	//start the server on port number *address
 	app.InfoLogger.Println("Server is running on port: ", *address)
 	server := app.Start()
