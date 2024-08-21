@@ -2,21 +2,23 @@ package database
 
 import (
 	"database/sql"
+	"time"
 	"github.com/ante-neh/Rss-aggregator/types"
 	"github.com/ante-neh/Rss-aggregator/util"
 	"github.com/google/uuid"
-	"time"
 )
 
 type DatabaseOperation interface {
 	GetFeeds()([]types.Feeds, error)
 	DeleteFeedFollow(id uuid.UUID)(error)
 	GetUser(api_key string) (types.User, error)
+	MarkFeedsAsFetch(id uuid.UUID)(types.Feeds, error)
 	GetNextFeedsToFetch(limit int)([]types.Feeds, error)
 	GetFeedFollows(id uuid.UUID)([]types.FeedFollow, error)
 	Createuser(id uuid.UUID, created_at time.Time, updated_at time.Time, name string) (types.User, error)
 	CreateFeeds(id uuid.UUID, user_id uuid.UUID, created_at, update_at time.Time, name, url string) (types.Feeds, error)
 	CreateFeedFollows(id uuid.UUID, created_at, updated_at time.Time, feed_id, user_id uuid.UUID)(types.FeedFollow, error)
+	CreatePost(id, feed_id uuid.UUID, created_at, updated_at, published_at time.Time, title, description, url string)(error)
 }
 type Postgres struct {
 	DB *sql.DB
@@ -151,7 +153,7 @@ func(p *Postgres) DeleteFeedFollow(id uuid.UUID)(error){
 }
 
 func (p *Postgres) GetNextFeedToFetch(limit int)([]*types.Feeds, error){
-	stmt := "SELECT * FROM feeds ORDER BY last_fetched_at ASC NOT NULLS FIRST LIMIT $1"
+	stmt := "SELECT * FROM feeds ORDER BY last_fetched_at ASC NULLS FIRST LIMIT $1"
 
 	rows, err := p.DB.Query(stmt, limit)
 	if err != nil{
@@ -163,7 +165,7 @@ func (p *Postgres) GetNextFeedToFetch(limit int)([]*types.Feeds, error){
 
 	for rows.Next(){
 		feed := &types.Feeds{}
-		err := rows.Scan(&feed.ID, &feed.Created_at, &feed.Updated_at, &feed.Name, &feed.Url, &feed.Last_Fetched_At)
+		err := rows.Scan(&feed.ID, &feed.Created_at, &feed.Updated_at, &feed.Name, &feed.Url,  &feed.UserId,  &feed.Last_Fetched_At)
 
 		if err != nil{
 			return []*types.Feeds{}, err
@@ -179,4 +181,38 @@ func (p *Postgres) GetNextFeedToFetch(limit int)([]*types.Feeds, error){
 
 
 	return feeds, nil
+}
+
+
+func (p *Postgres) MarkFeedsAsFetch(id uuid.UUID)(types.Feeds, error){
+	stmt := "UPDATE feeds SET last_fetched_at=$1, updated_at=$2 WHERE id=$3 RETURNING id, user_id, name, created_at, updated_at, url, last_fetched_at"
+	var feed types.Feeds
+
+	err := p.DB.QueryRow(stmt, time.Now(), time.Now(), id).Scan(
+		&feed.ID,
+		&feed.UserId,
+		&feed.Name,
+		&feed.Created_at,
+		&feed.Updated_at,
+		&feed.Url,
+		&feed.Last_Fetched_At,
+	)
+	if err != nil {
+		return types.Feeds{}, err
+	} 
+
+	return feed, nil 
+}
+
+
+func (p *Postgres) CreatePost(id, feeds_id uuid.UUID, created_at, updated_at, published_at time.Time, title, description, url string)(error){
+
+	stmt := "INSERT INTO posts(id, created_at, updated_at, title, description, published_at, url, feeds_id) VALUES($1, $2, $3, $4, $5, $6, $7, $8)"
+	_, err := p.DB.Query(stmt, id, created_at, updated_at, title, description, published_at, url, feeds_id)
+	if err != nil{
+		return err 
+
+	}
+
+	return nil 
 }

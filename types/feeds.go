@@ -22,3 +22,22 @@ type FeedFollow struct {
 	FeedId     uuid.UUID `json:"feed_id"`
 	UserId     uuid.UUID `json:"user_id"`
 }
+
+type RssItem struct{
+	Title string `xml:"title"`
+	Link string `xml:"link"`
+	Description string `xml:"description"`
+	PubDate string `xml:"pubdate"`
+}
+type Channel struct{
+	Title string `xml:"title"`
+	Link string `xml:"link"`
+	Description string `xml:"description"`
+	Language string `xml:"language"`
+	Item []RssItem `xml:"item"`
+
+}
+
+type RssFeed struct{
+	Channel Channel `xml:"channel"`
+}

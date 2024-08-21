@@ -1,13 +1,15 @@
 package main
 
 import (
+	"database/sql"
+	"flag"
 	"log"
 	"os"
-	"flag"
-	"database/sql"
-	_ "github.com/lib/pq"
+	"time"
+
 	"github.com/ante-neh/Rss-aggregator/internal/server"
 	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -41,10 +43,13 @@ func main() {
 	//create a new server type
 	app := server.NewServer(infoLogger, errorLogger, *address, db)
 
-	//start the server on port number *address
-	server := app.Start()
+	go app.StartScrapping(10, time.Minute)
 
+	
+	//start the server on port number *address
 	app.InfoLogger.Println("Server is running on port: ", *address)
+	server := app.Start()
+	
 
 	err = server.ListenAndServe()
 	if err != nil {
